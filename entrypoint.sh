@@ -30,22 +30,10 @@ switch_working_directory() {
   echo "Package dir: $PWD"
 }
 
-detect_flutter_package() {
-  GET_OUTPUT=`pub get`
-  if [ "$?" = 69 ]; then
-    INPUT_FLUTTER="true"
-    echo "Flutter package detected"
-  fi
-}
-
 get_local_package_version() {
-  if [ "$INPUT_FLUTTER" = "true" ]; then
-    GET_OUTPUT=`flutter pub get`
-    DEPS_OUTPUT=`flutter pub deps`
-  else
-    GET_OUTPUT=`pub get`
-    DEPS_OUTPUT=`pub deps`
-  fi
+  GET_OUTPUT=`flutter pub get`
+  DEPS_OUTPUT=`flutter pub deps`
+
   PACKAGE_INFO=`echo "$DEPS_OUTPUT" | cut -d'|' -f1 | cut -d"'" -f1 | sed '/^\s*$/d'`
   IFS=$'\n\r' read -d '' -r -a lines <<< "$PACKAGE_INFO"
   lastIndex=`expr ${#lines[@]}-1`
@@ -159,7 +147,6 @@ EOF
 
 check_required_inputs
 switch_working_directory
-detect_flutter_package || true
 get_local_package_version || true
 run_unit_tests
 get_remote_package_version || true
