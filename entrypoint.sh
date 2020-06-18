@@ -63,20 +63,12 @@ run_unit_tests() {
       HAS_BUILD_TEST=`echo "$DEPS_OUTPUT" | perl -n -e'/^.* build_test (.*)/ && print $1'`
       HAS_TEST=`echo "$DEPS_OUTPUT" | perl -n -e'/^.* (test|flutter_test) (.*)/ && print $2'`
       if [ "$HAS_BUILD_RUNNER" != "" ] && [ "$HAS_BUILD_TEST" != "" ] && [ "$INPUT_SUPPRESSBUILDRUNNER" != "true" ]; then
-        if [ "$INPUT_FLUTTER" = "true" ]; then
-          echo "flutter tests with build_runner"
-          flutter pub run build_runner build
-          flutter test
-        else
-          pub run build_runner test
-        fi
+        echo "flutter tests with build_runner"
+        flutter pub run build_runner build
+        flutter test
       else
         if [ "$HAS_TEST" != "" ]; then
-          if [ "$INPUT_FLUTTER" = "true" ]; then
-            flutter test
-          else
-            pub run test
-          fi
+          flutter test
         else
           echo "No unit test related dependencies detected, skip unit testing."
         fi
@@ -85,11 +77,7 @@ run_unit_tests() {
 }
 
 get_remote_package_version() {
-  if [ "$INPUT_FLUTTER" = "true" ]; then
-    ACTIVATE_OUTPUT=`flutter pub global activate $PACKAGE`
-  else
-    ACTIVATE_OUTPUT=`pub global activate $PACKAGE`
-  fi
+  ACTIVATE_OUTPUT=`flutter pub global activate $PACKAGE`
   REMOTE_PACKAGE_VERSION=`echo "$ACTIVATE_OUTPUT" | perl -n -e'/^Activated .* (.*)\./ && print $1'`
   if [ -z "$REMOTE_PACKAGE_VERSION" ]; then
     REMOTE_PACKAGE_VERSION="✗"
@@ -117,11 +105,9 @@ EOF
     else
       echo "$INPUT_CREDENTIALJSON" > ~/.pub-cache/credentials.json
     fi
-    if [ "$INPUT_FLUTTER" = "true" ]; then
-      flutter pub publish --dry-run
-    else
-      pub lish --dry-run
-    fi
+
+    flutter pub publish --dry-run
+
     if [ $? -eq 0 ]; then
       echo "Dry Run Successfull."
     else
@@ -131,11 +117,8 @@ EOF
     if [ "$INPUT_DRYRUNONLY" = "true" ]; then
       echo "Dry run only, skip publishing."
     else
-      if [ "$INPUT_FLUTTER" = "true" ]; then
-        flutter pub publish -f
-      else
-        pub lish -f
-      fi
+      flutter pub publish -f
+
       if [ $? -eq 0 ]; then
         echo "::set-output name=success::true"
       else
